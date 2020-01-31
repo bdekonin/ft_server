@@ -16,6 +16,8 @@ RUN apt-get upgrade -y
 
 # Setup - installing the webserver nginx and also installing a package, that is able to download something from a url.
 RUN apt-get install nginx wget -y
+# Setup - Installs neccesary packages for the Mariadb server (Mysql)
+RUN apt-get install mariadb-server mariadb-client -y
 
 
 # SSL - Downloading a tool that makes locally trusted certificates.
@@ -41,4 +43,4 @@ EXPOSE 80
 # Expose - SSL Certificate (https)
 EXPOSE 443
 
-CMD service nginx start && tail -f /dev/null
+CMD service nginx start && service mysql start && tail -f /dev/null
