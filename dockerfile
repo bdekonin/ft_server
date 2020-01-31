@@ -1,7 +1,7 @@
 FROM debian:buster
 
 #		docker build -t mydockerimage .
-# 		docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage bash
+# 		docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage
 # 		docker ps shows running containers
 # 		docker rmi removes images
 # 		docker rm removes container
@@ -15,7 +15,7 @@ RUN apt-get update -y
 RUN apt-get upgrade -y
 
 # Setup - installing the webserver nginx and also installing a package, that is able to download something from a url.
-RUN apt install nginx wget -y
+RUN apt-get install nginx wget -y
 
 
 # SSL - Downloading a tool that makes locally trusted certificates.
@@ -36,9 +36,9 @@ COPY srcs/nginx/index.html /tmp/index.nginx-debian.html
 RUN mv /tmp/index.nginx-debian.html /var/www/html/index.nginx-debian.html
 
 
-# Expose - nginx
+# Expose - nginx (http)
 EXPOSE 80
-# Expose - SSL Certificate
+# Expose - SSL Certificate (https)
 EXPOSE 443
 
 CMD service nginx start && tail -f /dev/null
