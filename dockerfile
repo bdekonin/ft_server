@@ -54,7 +54,6 @@ RUN service mysql start && \
     mysql -e "GRANT ALL PRIVILEGES ON app_db.* TO 'admin'@'localhost' IDENTIFIED BY 'password';" && \
 	mysql -e "FLUSH PRIVILEGES;"
 
-
 # SSL - Downloading a tool that makes locally trusted certificates.
 RUN wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.1/mkcert-v1.4.1-linux-arm
 # SSL - Makes the mkcert an executable.
@@ -73,10 +72,31 @@ COPY srcs/nginx/index.html /tmp/index.nginx-debian.html
 RUN mv /tmp/index.nginx-debian.html /var/www/html/index.nginx-debian.html
 
 
+#WORDPRESS START
+#wp core install --url=localhost --title="Your Blog Title" --admin_name=bdekonin --admin_password=password --admin_email=bdekonin@student.codam.nl
+RUN wget https://wordpress.org/latest.tar.gz -P /tmp
+# RUN mkdir /var/www/html
+RUN tar xzf /tmp/latest.tar.gz --strip-components=1 -C /var/www/html
+COPY srcs/wordpress/wp-config.php var/www/html/wp-config.php
+RUN chown -R www-data:www-data /var/www/html
+
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+RUN chmod 644 /var/www/html/wp-config.php
+# RUN 
+
+
+#WORDPRESS END
+
 # Expose - nginx (http)
 EXPOSE 80
 # Expose - SSL Certificate (https)
 EXPOSE 443
 
 
-CMD service nginx start && service mysql start && service php7.3-fpm start && tail -f /dev/null
+CMD service nginx start && service mysql start && \
+	service php7.3-fpm start && \
+	wp core install --url=localhost --title="ft_server" --admin_name=admin --admin_password=password --admin_email=bdekonin@student.codam.nl --allow-root --path=var/www/html && \
+	tail -f /dev/null
