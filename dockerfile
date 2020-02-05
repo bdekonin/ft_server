@@ -3,15 +3,12 @@ FROM debian:buster
 #		docker build -t mydockerimage .
 # 		docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage
 
-# -y:   During the execition you may get yes/no prompts. With this option is always run the option with yes.
-# -it:  Stands for Interactive Terminal
-
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
 
-# Setup - installing the webserver nginx and also installing a package, that is able to download something from a url.
-RUN apt-get install nginx wget -y
+# Setup - installing the webserver nginx and also installing a package, that is able to download something from a url. Aswell as a unzipper.
+RUN apt-get install nginx wget unzip -y
 # Setup - installing neccesary packages for the Mariadb server (Mysql)
 RUN apt-get install mariadb-server mariadb-client -y
 
@@ -72,31 +69,28 @@ COPY srcs/nginx/index.html /tmp/index.nginx-debian.html
 RUN mv /tmp/index.nginx-debian.html /var/www/html/index.nginx-debian.html
 
 
-#WORDPRESS START
-#wp core install --url=localhost --title="Your Blog Title" --admin_name=bdekonin --admin_password=password --admin_email=bdekonin@student.codam.nl
+# Wordpress - Installs Wordpress
 RUN wget https://wordpress.org/latest.tar.gz -P /tmp
-# RUN mkdir /var/www/html
 RUN tar xzf /tmp/latest.tar.gz --strip-components=1 -C /var/www/html
 COPY srcs/wordpress/wp-config.php var/www/html/wp-config.php
+# Wordpress - Changes ownership of the folder.
 RUN chown -R www-data:www-data /var/www/html
-
+# Wordpress - This is a package which let you configure wordpress before starting the container
 RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
-
 RUN chmod 644 /var/www/html/wp-config.php
-# RUN 
+COPY srcs/wordpress/upload_max.zip /var/www/html/wp-content/plugins
+RUN cd /var/www/html/wp-content/plugins && unzip upload_max.zip
 
-
-#WORDPRESS END
 
 # Expose - nginx (http)
 EXPOSE 80
 # Expose - SSL Certificate (https)
 EXPOSE 443
 
-
 CMD service nginx start && service mysql start && \
 	service php7.3-fpm start && \
 	wp core install --url=localhost --title="ft_server" --admin_name=admin --admin_password=password --admin_email=bdekonin@student.codam.nl --allow-root --path=var/www/html && \
+	wp plugin activate upload_max --allow-root --path=var/www/html && \
 	tail -f /dev/null
