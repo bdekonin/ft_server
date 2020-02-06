@@ -1,9 +1,5 @@
 FROM debian:buster
 
-#	docker build -t mydockerimage .
-# 	docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage
-
-
 # Setup - This checks and also updates to the latest version
 RUN apt-get update -y
 RUN apt-get upgrade -y
@@ -84,6 +80,14 @@ COPY srcs/wordpress/upload_max.zip /var/www/html/wp-content/plugins
 RUN cd /var/www/html/wp-content/plugins && unzip upload_max.zip
 # Wordpress - Making sure the dir "uploads" exist by just creating one. And giving it full permissions, but most important is giving it the permission to read and write.
 RUN cd var/www/html/wp-content && mkdir uploads && ls && chmod -R 777 uploads
+# Wordpress - installing sendmail to prevent an error where it cannot run and find sendmail
+RUN apt-get install sendmail -y
+# Wordpress - Configuring wordpress
+RUN service nginx start && service mysql start && \
+	service php7.3-fpm start && \
+	echo "Configuring wordpress" && \
+	wp core install --url=localhost --title="ft_server" --admin_name=admin --admin_password=password --admin_email=bdekonin@student.codam.nl --allow-root --path=var/www/html && \
+	wp plugin activate upload_max --allow-root --path=var/www/html
 
 
 # Expose - nginx (http)
@@ -94,6 +98,6 @@ EXPOSE 443
 
 CMD service nginx start && service mysql start && \
 	service php7.3-fpm start && \
-	wp core install --url=localhost --title="ft_server" --admin_name=admin --admin_password=password --admin_email=bdekonin@student.codam.nl --allow-root --path=var/www/html && \
-	wp plugin activate upload_max --allow-root --path=var/www/html && \
+	echo "$(hostname -i)	$(hostname) $(hostname).localhost" >> /etc/hosts && \
+	service sendmail start && \
 	tail -f /dev/null
