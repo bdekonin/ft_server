@@ -1,20 +1,19 @@
 FROM debian:buster
 
-#		docker build -t mydockerimage .
-# 		docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage
+#	docker build -t mydockerimage .
+# 	docker run --rm --name mydockerfile -p 80:80 -p 443:443 -it mydockerimage
 
+
+# Setup - This checks and also updates to the latest version
 RUN apt-get update -y
 RUN apt-get upgrade -y
-
-
 # Setup - installing the webserver nginx and also installing a package, that is able to download something from a url. Aswell as a unzipper.
 RUN apt-get install nginx wget unzip -y
 # Setup - installing neccesary packages for the Mariadb server (Mysql)
 RUN apt-get install mariadb-server mariadb-client -y
 
 # PHP - installing neccesary packages for (phpMyAdmin)
-RUN apt install -y php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli \
-	php7.3-common php7.3-json php7.3-opcache php7.3-readline php-gd php-mbstring
+RUN apt install -y php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli php7.3-common php7.3-json php7.3-opcache php7.3-readline php-gd php-mbstring
 # PHP - downloads a file from the link givin. wget is used for this.
 RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.9.0.1/phpMyAdmin-4.9.0.1-all-languages.tar.gz
 # PHP - unzips the tar files and moves it to the folder where nginx is also installed.
@@ -54,7 +53,7 @@ RUN service mysql start && \
 # SSL - Downloading a tool that makes locally trusted certificates.
 RUN wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.1/mkcert-v1.4.1-linux-arm
 # SSL - Makes the mkcert an executable.
-RUN chmod +x mkcert-v1.4.1-linux-arm
+RUN chmod 777 mkcert-v1.4.1-linux-arm
 RUN mv mkcert-v1.4.1-linux-arm /usr/local/bin/mkcert
 RUN /usr/local/bin/mkcert -install
 # SSL - Generates a certificate/certificate key for the domain localhost.
@@ -77,12 +76,13 @@ COPY srcs/wordpress/wp-config.php var/www/html/wp-config.php
 RUN chown -R www-data:www-data /var/www/html
 # Wordpress - This is a package which let you configure wordpress before starting the container
 RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN chmod +x wp-cli.phar
+RUN chmod 777 wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
-RUN chmod 644 /var/www/html/wp-config.php
+RUN chmod 777 /var/www/html/wp-config.php
 COPY srcs/wordpress/upload_max.zip /var/www/html/wp-content/plugins
 RUN cd /var/www/html/wp-content/plugins && unzip upload_max.zip
-
+# Wordpress - Making sure the dir "uploads" exist by just creating one. And giving it full permissions, but most important is giving it the permission to read and write.
+RUN cd var/www/html/wp-content && mkdir uploads && ls && chmod -R 777 uploads
 
 # Expose - nginx (http)
 EXPOSE 80
