@@ -65,7 +65,7 @@ COPY srcs/nginx/nginx.conf /tmp/default
 RUN mv /tmp/default /etc/nginx/sites-available/default
 # Files - Moving an reconfigured index.html and replaces it with the existing one.
 COPY srcs/nginx/index.html /tmp/index.nginx-debian.html
-RUN mv /tmp/index.nginx-debian.html /var/www/html/index.nginx-debian.html
+RUN mv /tmp/index.nginx-debian.html /var/www/html/index.html
 
 
 # Wordpress - Installs Wordpress
