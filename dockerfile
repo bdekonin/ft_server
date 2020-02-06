@@ -12,6 +12,7 @@ RUN apt-get install nginx wget unzip -y
 # Setup - installing neccesary packages for the Mariadb server (Mysql)
 RUN apt-get install mariadb-server mariadb-client -y
 
+
 # PHP - installing neccesary packages for (phpMyAdmin)
 RUN apt install -y php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli php7.3-common php7.3-json php7.3-opcache php7.3-readline php-gd php-mbstring
 # PHP - downloads a file from the link givin. wget is used for this.
@@ -31,7 +32,7 @@ RUN service mysql start && \
     mysql -e "CREATE USER 'admin'@'localhost' IDENTIFIED BY 'password';" && \
     mysql -e "GRANT ALL PRIVILEGES ON * . * TO 'admin'@'localhost';" && \
     mysql -e "FLUSH PRIVILEGES;"
-# MYSQL - Add the user and grant permission to phpMyAdmin’s database.
+# MYSQL - Add the user and grants permission to phpMyAdmin’s database.
 RUN service mysql start && \
     mysql -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'admin'@'localhost' IDENTIFIED BY 'password';" && \
     mysql -e "FLUSH PRIVILEGES;"
@@ -84,10 +85,12 @@ RUN cd /var/www/html/wp-content/plugins && unzip upload_max.zip
 # Wordpress - Making sure the dir "uploads" exist by just creating one. And giving it full permissions, but most important is giving it the permission to read and write.
 RUN cd var/www/html/wp-content && mkdir uploads && ls && chmod -R 777 uploads
 
+
 # Expose - nginx (http)
 EXPOSE 80
 # Expose - SSL Certificate (https)
 EXPOSE 443
+
 
 CMD service nginx start && service mysql start && \
 	service php7.3-fpm start && \
