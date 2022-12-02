@@ -1,4 +1,8 @@
-# ft_server - @ Codam Coding College
+# ft_server
+
+[![CodeFactor](https://www.codefactor.io/repository/github/bdekonin/ft_server/badge)](https://www.codefactor.io/repository/github/bdekonin/ft_server)
+
+
 This project will give us the basic understanding of Docker. This Dockerfile will allow you to install a complete web server, included with a MYSQL database, phpMyAdmin and also WordPress.
 
 #### What is docker?
